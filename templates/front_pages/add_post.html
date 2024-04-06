@@ -1,0 +1,21 @@
+{% extends 'index.html' %}
+{% load static %}
+
+{% block body %}
+<form class="form-div" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="form-input-div">
+        <div class="form-group">
+            <label for="exampleFormControlFile1"><b>Image:</b></label>
+            <input type="file" name="image" class="form-control-file"
+                id="exampleFormControlFile1" required>
+        </div>
+        <div class="form-group">
+            <label for="caption"><b>Caption:</b></label>
+            <textarea name="caption" id="caption" class="form-control" cols="60" rows="5"></textarea>
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-dark">Upload</button>
+</form>
+{% endblock %}

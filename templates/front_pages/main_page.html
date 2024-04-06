@@ -1,0 +1,37 @@
+{% extends 'index.html' %}
+{% load static %}
+
+{% block body %}
+<div class="Content justify-content-center">
+    <div class="Content-Item flex-column justify-content-center">
+        {% for obj in object_list %}
+        
+        <div class="card p-2">
+            <p style="text-transform: capitalize; font-weight: bold;">{{obj.profile.username}}</p>
+            <img src="/media/{{obj.image}}"
+                class="card-img-top" alt="{{request.user}}">
+            <div class="card-body">
+                <div class="d-flex flex-row justify-content-between">
+                    <div class="d-flex flex-column likes">
+                        <i style="font-size: 30px;" value="{{obj.profile}} {{obj.id}}"
+                        class="fa-heart fa-regular" 
+                        id="click"></i>
+                        
+                        <p class="span" id="likes_count" style="font-weight: bold;">{{obj.likes.all.count}}</p>
+                    </div>
+                    <i style="font-size: 30px;" class="fa-regular fa-comment"></i>
+                    <div></div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+            
+
+    </div>
+</div>
+<script src="{% static 'script/get.js' %}"></script>
+
+<script src="{% static 'script/puts.js' %}"></script>
+
+
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends 'index.html' %}
+{% load static %}
+
+{% block body %}
+<div class="container">
+    <div class="row">
+        {% for pro in profile %}
+        <div class="col-md-4">
+            <div class="card" style="margin-bottom: 40px;">
+                <img src="{% static 'images/Untitled.jpg' %}"
+                    class="card-img-top" alt="...">
+                <div class="card-body">
+                    <div class="d-flex flex-row justify-content-between">
+                        
+                            <div>
+                                <h5>{{pro.user.username}}</h5>
+
+                            </div>
+                            <div>
+                                <form action="{% url 'follow_x' pro.id %}" method="post">
+                                {% csrf_token %}
+                                {% if pro in request.user.profile.follows.all %}
+                                <button type="submit" name="status" class="btn btn-danger" value="unfollow">unfollow</button>
+                                {% else %}
+                                <button type="submit" name="status" class="btn btn-info" value="follow">follow</button>
+                                
+                                {% endif %}
+                                </form>
+
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        {% endfor %}
+
+        </div>
+    </div>
+
+    {% endblock%}
