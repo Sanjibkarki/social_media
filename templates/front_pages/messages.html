@@ -1,0 +1,37 @@
+{% extends 'index.html' %}
+{% load static %}
+
+{% block body %}
+    <div class="conatainer">
+        {% for i in  friend %}
+        <div class="message-contain" id="{{i.id}}">
+            <div class="message-box">
+                <p>
+                    {{i.id}}
+                    {{i.user}}
+                </p>
+                <b>send a message</b>
+            </div>
+        </div>  
+        {% endfor %}
+            
+    </div>
+    <script>
+        var user = "{{request.user}}";
+        document.querySelectorAll(".message-contain").forEach((div)=>{
+            div.addEventListener('click',(e)=>{
+                let userId;
+                if (e.target.className == "message-contain"){
+                    userId = e.target.id;
+
+                }
+                else{
+                    parent = e.target.parentNode.parentNode ;
+                    userId = parent.id;
+                }
+                window.location.pathname = "/"+ userId + "/";
+            })
+        })
+    </script>
+{% endblock %}
+    

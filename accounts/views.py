@@ -26,7 +26,7 @@ class Login(View):
                 return redirect("home")
             else:
                 return redirect("login")
-        return render(request, "account/login.html", {"errors": form.errors})
+        return render(request, "authentication/login.html", {"errors": form.errors})
 @method_decorator(cache_control(no_store = True,no_cache=True), name='dispatch')
 class Signup(View):
     def get(self,request):

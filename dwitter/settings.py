@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -40,9 +41,23 @@ INSTALLED_APPS = [
     'Home',
     'accounts',
     'Post',
-    'rest_framework'
+    'rest_framework',
+    
 ]
-
+ASGI_APPLICATION = "dwitter.asgi.application"
+CHANNEL_LAYERS = {
+    'default': {
+        # Redis config (for prod)
+        # 'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        # 'CONFIG': {
+        #     'hosts': [
+        #         ('localhost', 6379)
+        #     ]
+        # }
+        # InMemoryChannelLayer config (for dev)
+        'BACKEND': 'channels.layers.InMemoryChannelLayer'
+    }
+}
 MIDDLEWARE = [
     
     'django.middleware.security.SecurityMiddleware',
