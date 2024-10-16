@@ -3,9 +3,10 @@ from django.views import View
 from django.http import HttpResponseNotFound
 from django.views.generic import ListView
 from .models import PostX,Likes
+from Home.models import ChatModel,SenderModel,ReceiverModel
 from django.shortcuts import get_object_or_404
-from rest_framework.generics import ListCreateAPIView,RetrieveAPIView,DestroyAPIView
-from .serializer import Serializer,Myserializer
+from rest_framework.generics import ListCreateAPIView,RetrieveAPIView,DestroyAPIView,RetrieveUpdateAPIView
+from .serializer import Serializer,Myserializer,chatSerializer
 import json
 from rest_framework.response import Response
 
@@ -25,6 +26,7 @@ class Create(ListCreateAPIView):
             return product.objects.none()
         return qs
 
+        
 class Retrieve(RetrieveAPIView):
     queryset = PostX.objects.all()
     serializer_class = Serializer
@@ -66,4 +68,17 @@ class Count(RetrieveAPIView):
         queryset = qs.get(id=pk)
         count = queryset.likes.all().count()
         return Response({"count": count})
+
+
+class Chatseen(RetrieveUpdateAPIView):
+    queryset = ChatModel.objects.all()
+    serializer_class = chatSerializer
     
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance:
+            instance.is_read = True
+            instance.save()
+        
+        serializer = self.get_serializer(instance)  
+        return Response(serializer.data)

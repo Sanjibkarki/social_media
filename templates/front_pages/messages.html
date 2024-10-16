@@ -2,13 +2,12 @@
 {% load static %}
 
 {% block body %}
-    <div class="conatainer">
+    <div class="messaging">
         {% for i in  friend %}
         <div class="message-contain" id="{{i.id}}">
-            <div class="message-box">
-                <p>
-                    {{i.id}}
-                    {{i.user}}
+            <div class="message-box" >
+                <p class="username" id="{{i.user.email}}">
+                    {{i.user.email}}
                 </p>
                 <b>send a message</b>
             </div>
@@ -23,13 +22,23 @@
                 let userId;
                 if (e.target.className == "message-contain"){
                     userId = e.target.id;
-
+                    
                 }
                 else{
                     parent = e.target.parentNode.parentNode ;
                     userId = parent.id;
                 }
-                window.location.pathname = "/"+ userId + "/";
+                /*
+                if (senders.includes(userId)){
+                    let count = document.getElementById('messageCount')
+                    parsedcount = parseInt(count.innerText,10)
+                    console.log("message")
+                    count.innerText = parsedcount - 1
+                    senders.pop(userId)
+                }
+                */
+                
+                window.location.pathname = "/messages/"+ userId + "/";
             })
         })
     </script>

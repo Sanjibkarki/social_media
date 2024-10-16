@@ -1,54 +1,22 @@
 {% extends 'index.html' %}
 
 {% block body %}
-<style>
-#chat-container {
-    overflow: scroll;
-    height: 100vh;
-    
-}
-.messages{
-    height: 90px;
-}
-.receive-message{
-    width: 200px;
-    height: 70px;
-    margin: 5px;
-    padding: 5px;
-    border-radius: 20px;
-    background-color: whitesmoke;
-}
-.sent-message{
-    width: 200px;
-    float: right;
-    width: fit-content;
-    height: 70px;
-    margin: 5px;
-    padding: 5px;
-    border-radius: 20px;
-    background-color: whitesmoke;
-}
-.chat{
-    height: 10px;
-}
-.text-insert{
-    width: 100%;
-    height: 40px;
-}
-#chat-input{
-    width: 85%;
-}
-#send-chat{
-    width: 10%;
-}
 
-</style>>
-<div class="container">
+<div class="chats">
     <div id="chat-container">
         {% for chat in chats %}
         <div class="messages">
-
-            <div class="{% if chat.sender.user.username == request.user.username %}sent-message{% else %}receive-message{% endif %}">
+            <div class="
+                {% if chat.sender.user.username == request.user.username %}
+                    sent-message
+                {% else %}
+                    receive-message
+                    {% if chat.is_read %}
+                        read
+                    {% else %}
+                        unread
+                    {% endif %}
+                {% endif %}">
                 <div class="chat">
                     <p>
                         <b>{{ chat.sender.user.username }}:</b>
@@ -68,12 +36,28 @@
 
     </div>
 </div>
+
 {{ user2.pk|json_script:'user2-pk' }}
 
 <script>
-        // Setup user2 pk
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+    
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.startsWith(name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+        const user = '{{request.user.username}}'
         const roomName= JSON.parse(document.querySelector('#user2-pk').innerText);
-        
         // Setup the websocket
         const chatSocket = new WebSocket(
             'ws://'
@@ -82,40 +66,86 @@
             + roomName
             + '/'
         );
-
+        
         // When there is a message on websocket
         chatSocket.onmessage = (e) => {
-            // Get and decode the message
-            const message = JSON.parse(e.data)['chatmodel'];
+            const data = JSON.parse(e.data);
+            const chatContainerEl = document.querySelector('#chat-container');
+            maindiv = document.createElement('div');
+            indiv = document.createElement('div');
+            indiv.className = 'messages';
+            if (data.info){
+                if ("{{request.user}}"!=data.user){
+                    console.log("{{request.user}}")
+                    info = data['info']
+                    if (info){
+                    const url = window.location.pathname;
+                    const parts = url.split("/").filter(part => part);
+                    const lastPart = parts[parts.length - 1];
+                    if (senders.includes(lastPart)){
+                        senders.pop(lastPart)
+                    }
+                    let count = document.getElementById('messageCount')
+                    parsedcount = parseInt(count.innerHTML,10)
+                    count.innerHTML = parsedcount-1
+                }
+                }
+            }
+            if(data.chatmodel){
+                message = data['chatmodel']
+            // Sender Side
 
-            // Get the chat container and create chat div element for
-            // the message
-            const chatContainerEl = document.querySelector('#chat-container'),
-            chatEl = document.createElement('div');
-            chatEl.className = 'chat';
-
-            // Setup elements for message
-            const messageEl = document.createElement('p'),
-            senderEl = document.createElement('b'),
-            textEl = document.createElement('span'),
-            logEl = document.createElement('p');
-            
-            // Put the message data to their corresponding element
-            senderEl.innerText = message.sender_username + ': ';
-            textEl.innerText = message.text;
-            logEl.innerText = message.log;
-            
-            // Append the senderEl and textEl to messageEl
-            messageEl.appendChild(senderEl);
-            messageEl.appendChild(textEl);
-
-            // Append the messageEl and logEl to chatEl
-            chatEl.appendChild(messageEl);
-            chatEl.appendChild(logEl);
-            
-            // Append the new message to chat container
-            chatContainerEl.appendChild(chatEl);
-        }
+                if (user == message.sender_username){
+                    maindiv.className = 'sent-message';
+                    
+                }
+    
+                // Receiver Side
+                else{
+                    maindiv.className = 'receive-message';
+                    const path = window.location.pathname;
+                    
+                    if (path === `/messages/${message.senderId}/`) {
+                        fetch( `http://127.0.0.1:8000/api/chatseen/${message.chatId}/ `,{
+                            credentials: "include",
+                            method: 'PUT',
+                            headers: {
+                                "Accept": "application/json",
+                                'Content-Type': 'application/json',
+                                "X-CSRFToken": getCookie("csrfToken"),
+                                
+                            },
+                            })
+                    } 
+                }
+                chatEl = document.createElement('div');
+                chatEl.className = 'chat';
+                
+                const messageEl = document.createElement('p'),
+                senderEl = document.createElement('b'),
+                textEl = document.createElement('span'),
+                logEl = document.createElement('p');
+                    senderEl.innerText = message.sender_username + ': ';
+                    textEl.innerText = message.text;
+                    logEl.innerText = message.log;
+                // Put the message data to their corresponding element
+                
+                
+                // Append the senderEl and textEl to messageEl
+                messageEl.appendChild(senderEl);
+                messageEl.appendChild(textEl);
+    
+                // Append the messageEl and logEl to chatEl
+                chatEl.appendChild(messageEl);
+                chatEl.appendChild(logEl);
+                maindiv.appendChild(chatEl)
+                indiv.appendChild(maindiv);
+                
+                // Append the new message to chat container
+                chatContainerEl.appendChild(indiv);
+            }
+            }
+        
 
         // When enter has been clicked on #chat-input element
         document.querySelector('#chat-input').focus();

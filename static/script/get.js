@@ -1,10 +1,11 @@
 function getCookie(name) {
-    var cookieValue = null;
+    let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
-        var cookies = document.cookie.split(';');
-        for (var i = 0; i < cookies.length; i++) {
-            var cookie = cookies[i].trim();;
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        const cookies = document.cookie.split(';');
+        console.log(cookies)
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.startsWith(name + '=')) {
                 cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
                 break;
             }
@@ -28,7 +29,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     headers: {
                         "Accept": "application/json",
                         'Content-Type': 'application/json',
-                        "X-CSRFToken": getCookie("csrftoken"),
+                        "X-CSRFToken": getCookie("csrfToken"),
+
                     },
                 })
                 .then((response) => {

@@ -6,7 +6,9 @@ from .models import Profile,SenderModel,ReceiverModel,ChatModel,ChatKeyModel
 from django.shortcuts import redirect
 from Post.models import PostX,Likes
 from django.views.generic import ListView
-
+from django.dispatch import receiver
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 # Create your views here.
 class Index(ListView):
     model = PostX
@@ -73,15 +75,16 @@ class Info(View):
  
 class Message(View):
     def get(self,request):
-        friend = request.user.profile.follows.all()
-        print(friend)
+        friend = request.user.profile.follows.exclude(user=request.user).all()
+        user = SenderModel.objects.get(user = request.user)
         return render(request,"front_pages/messages.html",{"friend":friend}) 
     
 class Room(View):
     def get(self,request,user_id):
         user1 = User.objects.get(pk=request.user.pk)        
-        userreq = Profile.objects.get(pk=user_id).user
-        user2 = User.objects.get(email=userreq)
+        receiver = Profile.objects.get(pk=user_id).user
+        #receiver
+        user2 = User.objects.get(email=receiver)
 
         # Setup sender and receiver models
         user1_sender = SenderModel.objects.get(user=user1.sendermodel.user)
@@ -92,7 +95,7 @@ class Room(View):
         # Get the sender and receiver chats to each other
         user1_chats = ChatModel.objects.filter(sender=user1_sender, receiver=user2_receiver)
         user2_chats = ChatModel.objects.filter(sender=user2_sender, receiver=user1_receiver)
-
+        
         # Put the chats in to `chats` list
         chats = [chat1 for chat1 in user1_chats]
         if not user1.get_username() == user2.get_username():
@@ -104,13 +107,15 @@ class Room(View):
         # for passing to template
         context = {
             'chats': chats,
-            'user2': user2
+            'user2': user2,
+            'userId':user_id
         }
         return render(request,"front_pages/room.html",context)
     
     def sort_pk(self, model):
         return model.pk
     
+@receiver(post_save, sender=User)
 def create_profile(sender, instance, created, **kwargs):
     if created:
         user_profile = Profile(user=instance)
@@ -118,9 +123,7 @@ def create_profile(sender, instance, created, **kwargs):
         user_profile.follows.add(instance.profile)
         user_profile.save()
 
-post_save.connect(create_profile, sender=User)
 
-from django.dispatch import receiver
 
 
 @receiver(post_save , sender=User)
@@ -145,3 +148,18 @@ def new_user(sender , instance , created , **kwargs):
             ChatKeyModel.objects.create(
                 usernames=usernames
             )
+
+from django.core.cache import cache
+    
+@receiver(post_save, sender=ChatModel)
+def notify_user(sender, instance, **kwargs):
+    channel_layer = get_channel_layer()
+    profile = Profile.objects.get(user = instance.sender.user).id
+    async_to_sync(channel_layer.group_send)(
+        f'user_{Profile.objects.get(user = instance.receiver.user).id}',
+        {
+            'type': 'send.notification',
+            'sender': profile,
+            'message': f'New message from {instance.sender.user.email}',     
+        }
+    )

@@ -8,9 +8,7 @@ from django.utils.timezone import now
 class Profile(models.Model):
     user = models.OneToOneField(User,on_delete = models.CASCADE)
     follows = models.ManyToManyField(
-
         "self",
-
         related_name="followed_by",
 
         symmetrical=False,
@@ -44,9 +42,17 @@ class ChatModel(models.Model):
     receiver = models.ForeignKey(ReceiverModel, on_delete=models.CASCADE)
     text = models.TextField()
     log = models.DateTimeField(default=now)
+    is_read = models.BooleanField(default=False)
 
     def __str__(self):
         return f'{self.sender.user.get_username()} chats {self.receiver.user.get_username()}'
+    
+    class Meta:
+        indexes = [
+            models.Index(fields=['receiver']),
+            models.Index(fields=['receiver', 'is_read']),
+            models.Index(fields=['sender']),
+        ]
     
 class ChatKeyModel(models.Model):
     '''Contains the chat key that will be used for group name on channel layer'''
@@ -68,3 +74,4 @@ class ChatKeyModel(models.Model):
             chatkey.usernames.sort()
             if chatkey.usernames == usernames:
                 return chatkey
+            

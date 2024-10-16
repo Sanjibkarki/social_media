@@ -1,10 +1,11 @@
 function getCookie(name) {
-    var cookieValue = null;
+    let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
-        var cookies = document.cookie.split(';');
-        for (var i = 0; i < cookies.length; i++) {
-            var cookie = cookies[i].trim();;
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        const cookies = document.cookie.split(';');
+
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.startsWith(name + '=')) {
                 cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
                 break;
             }
@@ -12,15 +13,17 @@ function getCookie(name) {
     }
     return cookieValue;
 }
-
 function get(a,value){
+    
+    
     fetch(`http://127.0.0.1:8000/api/count_likes/${value}`, {
                     credentials: "same-origin",
                     method: 'GET',
                     headers: {
                         "Accept": "application/json",
                         'Content-Type': 'application/json',
-                        "X-CSRFToken": getCookie("csrftoken"),
+                        "X-CSRFToken": getCookie("csrfToken"),
+                        
                     },
                 })
                 .then((response) => {
@@ -41,13 +44,12 @@ elements.forEach((a)=>{
             classes.add("fa-solid");
             a.style.color = "red";
             fetch('http://127.0.0.1:8000/api/create/', {
-            credentials: "same-origin",
+            credentials: 'same-origin',
             method: 'POST',
             headers: {
-                /*"Authorization": 'Bearer ' + token,*/
                 "Accept": "application/json",
                 'Content-Type': 'application/json',
-                "X-CSRFToken": getCookie("csrftoken"),
+                "X-CSRFToken": getCookie("csrfToken"),
             },
             body: JSON.stringify({"profile":value[0],"post":value[1],"liked":"True"})
             })
@@ -63,13 +65,15 @@ elements.forEach((a)=>{
             classes.remove("fa-solid");
             classes.add("fa-regular");
             a.style.color = "black";
+
             fetch(`http://127.0.0.1:8000/api/delete/${id}`, {
-            credentials: "same-origin",
+            credentials: "include",
             method: 'GET',
             headers: {
                 "Accept": "application/json",
                 'Content-Type': 'application/json',
-                "X-CSRFToken": getCookie("csrftoken"),
+                "X-CSRFToken": getCookie("csrfToken"),
+                
             },
             })
             .then((response)=>{

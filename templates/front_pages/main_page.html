@@ -2,8 +2,7 @@
 {% load static %}
 
 {% block body %}
-<div class="Content justify-content-center">
-    <div class="Content-Item flex-column justify-content-center">
+    <div class="Content-Item ">
         {% for obj in object_list %}
         
         <div class="card p-2">
@@ -28,7 +27,6 @@
             
 
     </div>
-</div>
 <script src="{% static 'script/get.js' %}"></script>
 
 <script src="{% static 'script/puts.js' %}"></script>
