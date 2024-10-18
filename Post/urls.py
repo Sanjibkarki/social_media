@@ -1,9 +1,8 @@
 from django.urls import path,include
-from .views import Create,Retrieve,Delete,Count,Chatseen
+from .views import Chatseen,Index,Update
 urlpatterns = [
-    path('create/', Create.as_view(), name='create'),
-    path('retrieve/<int:pk>/',Retrieve.as_view(),name='retrieve'),
+    path('index/',Index.as_view(),name='index'),
     path('chatseen/<int:pk>/',Chatseen.as_view(),name='chatseen'),
-    path('delete/<int:pk>/',Delete.as_view(),name='delete'),
-    path('count_likes/<int:pk>/',Count.as_view(),name='count')
+    path('like/<int:pk>/',Update.as_view(),name='detail'),
+
 ]

@@ -46,6 +46,9 @@
     width: 100%;
     height: 12vh;
 }
+.fa-solid{
+    color: red;
+}
 .hidden{
     display: none;
 }

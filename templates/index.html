@@ -87,14 +87,12 @@
       crossorigin="anonymous"></script>
     <script>
       const Id = "{{senderId}}"
-      console.log(Id)
       let senders = [];
       function hide(){
         const notifyElement = document.getElementById("notify");
         notifyElement.classList.remove("old-class");
         notifyElement.classList.add("hidden");
       }
-       
             const Socket = new WebSocket(
             'ws://'
             + window.location.host

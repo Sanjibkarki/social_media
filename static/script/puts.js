@@ -33,56 +33,5 @@ function get(a,value){
                     a.nextElementSibling.textContent = data['count']
                 })
 }
-const elements = document.querySelectorAll("#click")
-elements.forEach((a)=>{
-    a.addEventListener("click", (e) => {
-        var classes = e.target.classList;
-        var value = e.target.getAttribute("value");        
-        var value = value.split(" ");
-        if (classes.contains("fa-regular")) {
-            classes.remove("fa-regular");
-            classes.add("fa-solid");
-            a.style.color = "red";
-            fetch('http://127.0.0.1:8000/api/create/', {
-            credentials: 'same-origin',
-            method: 'POST',
-            headers: {
-                "Accept": "application/json",
-                'Content-Type': 'application/json',
-                "X-CSRFToken": getCookie("csrfToken"),
-            },
-            body: JSON.stringify({"profile":value[0],"post":value[1],"liked":"True"})
-            })
-            .then((response)=>{
-                get(a,value[1])
-                
-            })
-            
-            
-        
-        } else if (classes.contains("fa-solid")) {
-            var id = value[1];
-            classes.remove("fa-solid");
-            classes.add("fa-regular");
-            a.style.color = "black";
+console.log("ssadasd")
 
-            fetch(`http://127.0.0.1:8000/api/delete/${id}`, {
-            credentials: "include",
-            method: 'GET',
-            headers: {
-                "Accept": "application/json",
-                'Content-Type': 'application/json',
-                "X-CSRFToken": getCookie("csrfToken"),
-                
-            },
-            })
-            .then((response)=>{
-                get(a,value[1]);
-                
-            })
-            
-            
-            
-        }
-    });
-})

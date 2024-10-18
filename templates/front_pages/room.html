@@ -76,13 +76,12 @@
             indiv.className = 'messages';
             if (data.info){
                 if ("{{request.user}}"!=data.user){
-                    console.log("{{request.user}}")
                     info = data['info']
                     if (info){
                     const url = window.location.pathname;
                     const parts = url.split("/").filter(part => part);
                     const lastPart = parts[parts.length - 1];
-                    if (senders.includes(lastPart)){
+                  if (senders.includes(lastPart)){
                         senders.pop(lastPart)
                     }
                     let count = document.getElementById('messageCount')

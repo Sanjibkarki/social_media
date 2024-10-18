@@ -4,31 +4,19 @@ from django.db.models.signals import post_save
 from accounts.models import User
 from .models import Profile,SenderModel,ReceiverModel,ChatModel,ChatKeyModel
 from django.shortcuts import redirect
-from Post.models import PostX,Likes
+from Post.models import PostX
 from django.views.generic import ListView
 from django.dispatch import receiver
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 # Create your views here.
 class Index(ListView):
-    model = PostX
-    
-    def get_queryset(self):
-        request = self.request 
-        try:  
-            following_post=request.user.profile.follows.all().values_list('user')
-            queryset = PostX.objects.filter(profile__in = following_post)
-        except PostX.DoesNotExist:
-            queryset = None
-        return queryset
-    
     def get(self,request):
-        queryset = self.get_queryset()
-        if not queryset.exists():
-            return render(request,'front_pages/no_post.html')
-
+        post = PostX.objects.all()
+        if post:
+            return render(request,'front_pages/main_page.html')
         else:
-            return render(request,'front_pages/main_page.html',{"object_list":queryset})
+            return render(request,'front_pages/no_page.html')
     
 class Follow(View):
     def get(self,request):

@@ -2,34 +2,145 @@
 {% load static %}
 
 {% block body %}
-    <div class="Content-Item ">
-        {% for obj in object_list %}
-        
-        <div class="card p-2">
-            <p style="text-transform: capitalize; font-weight: bold;">{{obj.profile.username}}</p>
-            <img src="/media/{{obj.image}}"
-                class="card-img-top" alt="{{request.user}}">
-            <div class="card-body">
-                <div class="d-flex flex-row justify-content-between">
-                    <div class="d-flex flex-column likes">
-                        <i style="font-size: 30px;" value="{{obj.profile}} {{obj.id}}"
-                        class="fa-heart fa-regular" 
-                        id="click"></i>
-                        
-                        <p class="span" id="likes_count" style="font-weight: bold;">{{obj.likes.all.count}}</p>
-                    </div>
-                    <i style="font-size: 30px;" class="fa-regular fa-comment"></i>
-                    <div></div>
-                </div>
-            </div>
-        </div>
-        {% endfor %}
-            
 
-    </div>
-<script src="{% static 'script/get.js' %}"></script>
+<div class="Content-Item " id="postItem">
+    
+
+</div>
+<div id="loading">Loading...</div>
+
+
+<script>
+    function likescounter(value,a){
+
+        fetch(`http://127.0.0.1:8000/api/like/${value}/`, {
+            credentials: 'same-origin',
+            method: 'PATCH',
+            headers: {
+                "Accept": "application/json",
+                'Content-Type': 'application/json',
+                "X-CSRFToken": getCookie("csrfToken"),
+            },
+            })
+            .then((response)=>{
+                return response.json()
+            })
+            .then((data)=>{
+                a.nextElementSibling.innerText = data.likes
+            })
+    }
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.startsWith(name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        let page = 1;  
+        const postItem = document.getElementById("postItem")
+        let next = true;
+        const user = "{{request.user}}"
+        async function loadMorePosts() {
+            try {
+                if(!next){
+                    return;
+                }
+                const url = `/api/index/?page=${page}`;
+                fetch(url, {
+                    credentials: "same-origin",
+                    method: 'GET',
+                    headers: {
+                        "Accept": "application/json",
+                        'Content-Type': 'application/json',
+                        "X-CSRFToken": getCookie("csrfToken"),
+                        
+                    },
+            })
+            .then(response => {
+                if (!response.ok) {
+                throw new Error('Failed to load more posts');
+
+                }
+                return response.json();
+            })
+            .then(data => {
+                next = data.has_next
+                hasNext = data.has_next;
+                page += 1;
+                document.getElementById('loading').style.display = 'block';
+                data.posts.forEach(post => {
+                    const postElement = document.createElement('div');
+                    postElement.classList.add('card', 'p-2');
+                    postElement.innerHTML = `
+                        <p style="text-transform: capitalize; font-weight: bold;">${post.profile.profileUsername}</p>
+                        <img src="${post.image}" class="card-img-top" alt="${post.profile.profileUsername}">
+                        <div class="card-body">
+                            <div class="d-flex flex-row justify-content-between">
+                                <div class="d-flex flex-column likes">
+                                    <i style="font-size: 30px;"
+                                       value="${post.id}"
+                                       class="fa-heart ${post.hasLiked ? 'fa-solid': 'fa-regular'}"
+                                       id="click"></i>
+                                       <p class="span" id="likes_count" style="font-weight: bold;">${post.totalLikes}</p>
+                                </div>
+                                <i style="font-size: 30px;" class="fa-regular fa-comment"></i>
+                                <div></div>
+                            </div>
+                        </div>
+                    `;
+                    postItem.appendChild(postElement);
+                });
+
+                const elements = document.querySelectorAll("#click")
+                elements.forEach((a)=>{
+                a.addEventListener("click", (e) => {
+                    var classes = e.target.classList;
+                    var value = e.target.getAttribute("value");        
+                    var value = value.split(" ");
+                    value = value[0]
+                    if (classes.contains("fa-regular")) {
+                        classes.remove("fa-regular");
+                        classes.add("fa-solid");
+                        a.style.color = "red";
+                        likescounter(value,a)
+                    }
+                    else{
+                        classes.remove("fa-solid");
+                        classes.add("fa-regular");
+                        a.style.color = "black";
+
+                        likescounter(value,a)
+                    }
+                });
+            })
+                
+                
+            })
+                
+            } catch (error) {
+                console.error(error);
+                alert('Could not load more posts');
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+            postItem.addEventListener('scroll', () => {
+                if (postItem.scrollTop + postItem.offsetHeight >= postItem.scrollHeight) {
+                    loadMorePosts();
+                }
+            });
+            document.addEventListener('DOMContentLoaded', () => {
+                loadMorePosts();
+            });
+        </script>
 
 <script src="{% static 'script/puts.js' %}"></script>
-
 
 {% endblock %}
